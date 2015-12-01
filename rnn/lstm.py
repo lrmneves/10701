@@ -1,7 +1,5 @@
 import numpy as np
-from sklearn.metrics import confusion_matrix
 from sklearn.metrics.pairwise import cosine_similarity
-from lasagne.nonlinearities import ScaledTanH
 # import cv2
 import numpy as np
 import theano
