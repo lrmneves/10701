@@ -9,9 +9,11 @@ To run the demo,
 
 3. Open `demo.py` and modify `caffe_root` on **line 31** and `model_name` on **line 32**
 
-4. If you don't want images be plotted or you have trouble plotting images, disable `import matplotlib.pyplot as plt` on **line 2**, set `show_image` on **line 33** to `False`.
+4. The demo runs in CPU mode by default because the author had no money to buy a GPU. You could change `cpu_mode` on **line 44** to `False` to enable the GPU mode.
 
-5. Run `python demo.py`
+5. If you don't want images be plotted or you have trouble plotting images, disable `import matplotlib.pyplot as plt` on **line 2**, set `show_image` on **line 33** to `False`.
+
+6. Run `python demo.py`
 
 #Caffe Setup
 
