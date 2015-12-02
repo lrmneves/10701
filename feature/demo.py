@@ -28,13 +28,15 @@ def classify_image(trainedcnn, image_path, show_image=False):
     
 if __name__ == "__main__":
     # configuration
-    caffe_root = "/Users/zheng/Downloads/caffe/"
+    caffe_root = "/home/public/caffe/"
     model_name = "bvlc_googlenet"
+    show_image = True
     
     # set the plot parameters
-    plt.rcParams["figure.figsize"] = (10, 10)
-    plt.rcParams["image.interpolation"] = "nearest"
-    plt.rcParams["image.cmap"] = "gray"
+    if show_image:
+        plt.rcParams["figure.figsize"] = (10, 10)
+        plt.rcParams["image.interpolation"] = "nearest"
+        plt.rcParams["image.cmap"] = "gray"
     
     # load model
     trainedcnn = caffecnn.TrainedCNN(caffe_root=caffe_root,
@@ -49,6 +51,6 @@ if __name__ == "__main__":
     cat_gray_img_path = os.path.join(caffe_root, "examples/images/cat_gray.jpg")
     
     # classify images
-    res = classify_image(trainedcnn, fb_img_path, show_image=True)
-    res = classify_image(trainedcnn, cat_img_path, show_image=True)
-    res = classify_image(trainedcnn, cat_gray_img_path, show_image=True)
+    res = classify_image(trainedcnn, fb_img_path, show_image=show_image)
+    res = classify_image(trainedcnn, cat_img_path, show_image=show_image)
+    res = classify_image(trainedcnn, cat_gray_img_path, show_image=show_image)
