@@ -67,6 +67,35 @@ if __name__ == "__main__":
     frame_seqs = [
         [0,1,2,3,4,5,6,7,8,9,10,15,19,16,12,11,13,17,18,14],
     ]
+    # lstm mnist run2
+    # load data, (20, 10000, 64, 64) -> (10000, 20, 64, 64)
+    data = np.load("/home/public/mnist_test_seq.npy").transpose(1, 0, 2, 3)
+    need_base_1_to_0 = False
+    video_ids = [0]
+    frame_seqs = [
+        [0,1,2,3,4,5,6,7,8,9,10,11,12,15,17,14,16,13,18,19],
+    ]
+    # lstm car run2
+    # load data, (414, 720, 1280) -> (1, 414, 720, 1280)
+    data = np.load("/home/public/10701/feature/car.npy")
+    data = data.reshape((1,) + data.shape)
+    need_base_1_to_0 = False
+    video_ids = [0]
+    frame_seqs = [
+        [0,1,2,3,4,5,6,7,8,9,11,14,16,12,13,10,15,17,18,19],
+    ]
+    # lstm car run3
+    need_base_1_to_0 = False
+    video_ids = [0]
+    frame_seqs = [
+        [0,1,2,3,4,5,6,7,8,9,14,13,12,16,11,10,15,17,18,19],
+    ]
+    # lstm car run4
+    need_base_1_to_0 = False
+    video_ids = [0]
+    frame_seqs = [
+        [0,1,2,3,4,5,6,7,8,9,14,13,12,11,10,16,15,17,18,19],
+    ]
 
     pic_height = data.shape[2]
     pic_width = data.shape[3]
