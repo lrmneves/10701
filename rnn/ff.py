@@ -3,7 +3,7 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics.pairwise import cosine_similarity
 import cv2
 
-dataset = np.load("new_data.npy")
+# dataset = np.load("new_data.npy")
 # new_data = []
 # for frame in dataset:
 # 	new_frames = []
@@ -12,11 +12,11 @@ dataset = np.load("new_data.npy")
 # 	new_data.append(new_frames)
 
 
-X = [f[0] for f in dataset]
-Y = X[1:]
-X = X[:-1]
-np.save("X.npy",np.array(X))
-np.save("Y.npy",np.array(Y,dtype = "int32"))
+# X = [f[0] for f in dataset]
+# Y = X[1:]
+# X = X[:-1]
+# np.save("X.npy",np.array(X))
+# np.save("Y.npy",np.array(Y,dtype = "int32"))
 
 # X1 = X[:5]
 # X2 = X[5:10]
@@ -49,14 +49,17 @@ np.save("Y.npy",np.array(Y,dtype = "int32"))
 # 	X = np.vstack([X,current])
 # X1 = np.array([f[25] for f in dataset])
 # y = np.array([i for i in range(len(X))],dtype = "int32")
+
 size = 10
 
 X,Y = np.load("X.npy"),np.load("Y.npy")
-net = theanets.Regressor([len(X[0]),(100,"sigmoid"), len(X[0])])
+
+
+net = theanets.Regressor([len(X[0]),(100,"relu"), len(X[0])])
 # train = np.array(X),np.array(Y,dtype = "int32")
 train = X[:size],Y[:size]
 print "training"
-net.train(train, algo='sgd', learning_rate=1e-4, momentum=0.9)
+net.train(train, algo='sgd', learning_rate=1e-3, momentum=0.9)
 
 # Show confusion matrices on the training/validation splits.
 print "predicting"
@@ -67,12 +70,17 @@ pred = net.predict(X[size:])
 
 count = 0.0
 
+
+
+seen = set()
+
+sequence = []
 for i in range(len(pred-1)):
 
 	cv2.imwrite("pred"+str(i)+".jpg",pred[i].reshape(64,64).astype("uint8"))
 	cv2.imwrite("y"+str(i)+".jpg",X[i+10].reshape(64,64).astype("uint8"))
 
-	similarities = [(cosine_similarity(pred[i],X[j]),j) for j in range(10,len(X))]
+	similarities = [(cosine_similarity(pred[i],X[j]),j) for j in range(10,len(X)) if not j in seen]
 	similarities = sorted(similarities)
 	similarities= similarities[::-1]
 
@@ -83,12 +91,15 @@ for i in range(len(pred-1)):
 	else:
 		if similarities[1][1]== i+size+1:
 			count+=1
-	l = [s[1] for s in similarities[:3]]
+	l = [s[1] for s in similarities]
+	seen.add(l[0])
 
+	sequence.append(l[0])
 	print i+size , l
 
 print count/(20-size-1)
 
+print sequence
 # chars = re.sub(r'\s+', ' ', open('corpus.txt').read().lower())
 # txt = theanets.recurrent.Text(chars, min_count=10)
 # A = 1 + len(txt.alpha)  # of letter classes

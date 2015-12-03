@@ -36,19 +36,21 @@ X,Y = np.load("X.npy"),np.load("Y.npy")
 MIN_LENGTH = 10
 MAX_LENGTH = 1
 # Number of units in the hidden (recurrent) layer
-N_HIDDEN = 1000
+N_HIDDEN = 10
 # Number of training sequences in each batch
 N_BATCH = 10
 # Optimization learning rate
-LEARNING_RATE = 0.001
+
+LEARNING_RATE = 0.01
 # All gradients above this will be clipped
-GRAD_CLIP = 1000000
+GRAD_CLIP = 1000
 # How often should we check the output?
-EPOCH_SIZE = 100
+EPOCH_SIZE = 10
 # Number of epochs to train the net
 NUM_EPOCHS = 1000
 
 NUM_FEATURES = len(X[0])
+print NUM_FEATURES
 # X = [f[0] for f in dataset]
 # Y = X[1:]
 # X = X[:-1]
@@ -163,8 +165,8 @@ target_values = T.matrix('target_output')
 
 network_output = lasagne.layers.get_output(l_out)
 predictions = network_output
-cost = lasagne.objectives.squared_error(predictions, target_values).mean()
-# cost = T.mean(1 - T.batched_dot(predictions,target_values)/(tnorm(predictions)*tnorm(target_values)))
+# cost = lasagne.objectives.squared_error(predictions, target_values).mean()
+cost = T.mean(1 - T.batched_dot(predictions,target_values)/(tnorm(predictions)*tnorm(target_values)))
 # print cost
 # Retrieve all parameters from the network
 all_params = lasagne.layers.get_all_params(l_out)

@@ -1,3 +1,7 @@
+
+import os
+os.sys.path.insert(1, '/home/public/.local/lib/python2.7/site-packages/')
+
 from sklearn.metrics.pairwise import cosine_similarity,euclidean_distances
 from scipy.cluster.vq import *
 from sklearn.preprocessing import StandardScaler
@@ -31,7 +35,7 @@ def mse(x, t):
 # 		new_frames.append(frame[im].flatten())
 # 	new_data.append(new_frames)
 
-X_full = np.load("/Users/lrmneves/workspace/Fall 2015/MachineLearning/finalProject/mnist_feature_100_20.npy")
+X_full = np.load("/home/public/10701/rnn/mnist_feature_100_20.npy")
 X_t = X_full[0]
 
 X2= X_full[0][:-1]
