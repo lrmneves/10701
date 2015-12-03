@@ -1,4 +1,3 @@
-import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity,euclidean_distances
 from scipy.cluster.vq import *
 from sklearn.preprocessing import StandardScaler
@@ -8,7 +7,6 @@ import theano
 import theano.tensor as T
 import lasagne
 
-from skimage.measure import structural_similarity as ssim
 def tnorm(tens):
     '''
     Tensor Norm
@@ -44,15 +42,10 @@ X = np.hstack([X1,X2])
 # Y = np.hstack([Y1,Y2])
 FINAL_FEATURES = X1.shape[1]
 
-print X.shape
-print Y.shape
-
-
-
 
 # Min/max sequence length
 MIN_LENGTH = 10
-MAX_LENGTH = 10
+MAX_LENGTH = 3
 # Number of units in the hidden (recurrent) layer
 N_HIDDEN = 512
 # Number of training sequences in each batch
@@ -117,9 +110,12 @@ for b in range(N_BATCH):
     X_test.append([])
     # Y_train.append(Y[b*MAX_LENGTH + MAX_LENGTH-1])
     # Y_test.append(Y[b*MAX_LENGTH + MAX_LENGTH +9-1])
-    for l in range(MAX_LENGTH):
+    for l in range(MAX_LENGTH-1):
 
-    	X_train[b].append(X[b*MAX_LENGTH + l])
+        current = X[b*(MAX_LENGTH) + l]
+        current 
+    	
+
     	
     	try:
     		X_test[b].append(X[b*MAX_LENGTH + l+MAX_LENGTH*N_BATCH])
@@ -131,6 +127,7 @@ for b in range(N_BATCH):
         Y_test.append(Y[b*MAX_LENGTH + MAX_LENGTH-1+MAX_LENGTH*N_BATCH])
     except Exception: 
         continue 
+    X_train[b].append()
     X_train[b] = X_train[b][::1]
 X_test = np.array([X[11::1]])
 Y_test = np.array([Y[-1]])
@@ -243,38 +240,38 @@ try:
         next_frame = pred_func(np.array([sequence]))
         cv2.imshow("pred",(255*(next_frame)).reshape(64,64).astype("uint8"))
         cv2.waitKey(1000)
-        # for i in range(start_size, len(X)):
-        #     frames_left.add(i)
+        for i in range(start_size, len(X)):
+            frames_left.add(i)
 
-        # while len(frames_left) > 0:
-        #     print np.array([sequence]).shape
-        #     next_frame = pred_func(np.array([sequence]))
+        while len(frames_left) > 0:
+            print np.array([sequence]).shape
+            next_frame = pred_func(np.array([sequence]))
 
-        #     next_frame = np.array(255*next_frame,dtype = "uint8")
-        #     # cv2.imshow("pred",(next_frame).reshape(64,64).astype("uint8"))
-        #     # cv2.waitKey(1000)
-        #     dist = [(euclidean_distances(next_frame,Y[j]),j) for j in range(start_size,len(Y))]
+            next_frame = np.array(255*next_frame,dtype = "uint8")
+            # cv2.imshow("pred",(next_frame).reshape(64,64).astype("uint8"))
+            # cv2.waitKey(1000)
+            dist = [(euclidean_distances(next_frame,Y[j]),j) for j in range(start_size,len(Y))]
 
-        #     # similarities = [(cosine_similarity(next_frame,new_label_features[j]),j) for j in range(start_size,len(new_label_features))]
-        #     similarities = sorted(dist)
-        #     # similarities= similarities[::-1]
+            # similarities = [(cosine_similarity(next_frame,new_label_features[j]),j) for j in range(start_size,len(new_label_features))]
+            similarities = sorted(dist)
+            # similarities= similarities[::-1]
 
-        #     for s in similarities:
-        #         if s[1] in frames_left:
-        #             next_frame = X[s[1]+1]
+            for s in similarities:
+                if s[1] in frames_left:
+                    next_frame = X[s[1]+1]
 
-        #             frames_left.remove(s[1])
-        #             idx_sequence[0].append(s[1])
-        #             break 
+                    frames_left.remove(s[1])
+                    idx_sequence[0].append(s[1])
+                    break 
 
-        #     sequence.append(next_frame)
+            sequence.append(next_frame)
 
-        # print idx_sequence
+        print idx_sequence
 
-        # for i in range(len(idx_sequence[0])-1):
-        #     if(idx_sequence[0][i] + 1  == idx_sequence[0][i+1]):
-        #         count+=1
-        # print count/(1.0*(len(idx_sequence[0])-1))
+        for i in range(len(idx_sequence[0])-1):
+            if(idx_sequence[0][i] + 1  == idx_sequence[0][i+1]):
+                count+=1
+        print count/(1.0*(len(idx_sequence[0])-1))
         
         if cost_val < 1e-4:
             break;
