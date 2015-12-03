@@ -7,6 +7,8 @@ import numpy as np
 import theano
 import theano.tensor as T
 import lasagne
+
+from skimage.measure import structural_similarity as ssim
 def tnorm(tens):
     '''
     Tensor Norm
@@ -31,63 +33,19 @@ def mse(x, t):
 # 		new_frames.append(frame[im].flatten())
 # 	new_data.append(new_frames)
 
-# X_full = np.load("/Users/lrmneves/workspace/Fall 2015/MachineLearning/finalProject/mnist_feature_100_20.npy")
-# X_t = X_full[0]
-# print X_t.shape
+X_full = np.load("/Users/lrmneves/workspace/Fall 2015/MachineLearning/finalProject/mnist_feature_100_20.npy")
+X_t = X_full[0]
 
-# a
-X,Y = np.load("X.npy"),np.load("Y.npy")
+X2= X_full[0][:-1]
 
-sift = cv2.SIFT()
+# Y1= X_full[1][1:]
+X1,Y = np.load("X.npy"),np.load("Y.npy")
+X = np.hstack([X1,X2])
+# Y = np.hstack([Y1,Y2])
+FINAL_FEATURES = X1.shape[1]
 
-descriptor_list = []
-descriptor_flatten = []
-for img in X:
-
-    kp,des = sift.detectAndCompute(img.reshape(64,64),None)
-
-    descriptor_list.append(des)
-    for row in des:
-        descriptor_flatten.append(row)
-
-k = 1000
-voc, variance = kmeans(np.array(descriptor_flatten), k, 1) 
-
-im_features = np.zeros((len(descriptor_list), k), "float32")
-for i in xrange(len(descriptor_list)):
-    words, distance = vq(descriptor_list[i],voc)
-    for w in words:
-        im_features[i][w] += 1
-
-nbr_occurences = np.sum( (im_features > 0) * 1, axis = 0)
-idf = np.array(np.log((1.0*len(descriptor_list)+1) / (1.0*nbr_occurences + 1)), 'float32')
-
-stdSlr = StandardScaler().fit(im_features)
-new_features = stdSlr.transform(im_features)
-
-descriptor_list = []
-descriptor_flatten = []
-for img in Y:
-    kp,des = sift.detectAndCompute(img.reshape(64,64).astype("uint8"),None)
-
-    descriptor_list.append(des)
-    for row in des:
-        descriptor_flatten.append(row)
-im_features = np.zeros((len(descriptor_list), k), "float32")
-for i in xrange(len(descriptor_list)):
-    words, distance = vq(descriptor_list[i],voc)
-    for w in words:
-        im_features[i][w] += 1
-
-nbr_occurences = np.sum( (im_features > 0) * 1, axis = 0)
-idf = np.array(np.log((1.0*len(descriptor_list)+1) / (1.0*nbr_occurences + 1)), 'float32')
-
-# stdSlr = StandardScaler().fit(im_features)
-new_label_features = stdSlr.transform(im_features)
-
-
-
-# img=cv2.drawKeypoints(X[0].reshape(64,64),kp)
+print X.shape
+print Y.shape
 
 
 
@@ -96,19 +54,19 @@ new_label_features = stdSlr.transform(im_features)
 MIN_LENGTH = 10
 MAX_LENGTH = 10
 # Number of units in the hidden (recurrent) layer
-N_HIDDEN = 2048
+N_HIDDEN = 512
 # Number of training sequences in each batch
 N_BATCH = 1
 # Optimization learning rate
 LEARNING_RATE = 1e-3
 # All gradients above this will be clipped
-GRAD_CLIP = 1000
+GRAD_CLIP = 100
 # How often should we check the output?
-EPOCH_SIZE = 100
+EPOCH_SIZE = 10
 # Number of epochs to train the net
 NUM_EPOCHS = 1000
 
-NUM_FEATURES = len(new_features[0])
+NUM_FEATURES = len(X[0])
 # X = [f[0] for f in dataset]
 # Y = X[1:]
 # X = X[:-1]
@@ -161,20 +119,21 @@ for b in range(N_BATCH):
     # Y_test.append(Y[b*MAX_LENGTH + MAX_LENGTH +9-1])
     for l in range(MAX_LENGTH):
 
-    	X_train[b].append(new_features[b*MAX_LENGTH + l])
+    	X_train[b].append(X[b*MAX_LENGTH + l])
     	
     	try:
-    		X_test[b].append(new_features[b*MAX_LENGTH + l+MAX_LENGTH*N_BATCH])
+    		X_test[b].append(X[b*MAX_LENGTH + l+MAX_LENGTH*N_BATCH])
     		
     	except Exception:
     		continue
-    Y_train.append(new_label_features[b*MAX_LENGTH + MAX_LENGTH-1])
+    Y_train.append(Y[b*MAX_LENGTH + MAX_LENGTH-1])
     try:
-        Y_test.append(new_label_features[b*MAX_LENGTH + MAX_LENGTH-1+MAX_LENGTH*N_BATCH])
+        Y_test.append(Y[b*MAX_LENGTH + MAX_LENGTH-1+MAX_LENGTH*N_BATCH])
     except Exception: 
-        continue  
-# X_test = np.array([X[11:]])
-# Y_test = np.array([Y[11:]])
+        continue 
+    X_train[b] = X_train[b][::1]
+X_test = np.array([X[11::1]])
+Y_test = np.array([Y[-1]])
 # mask_train = np.zeros((N_BATCH, MAX_LENGTH))
 # mask_test = np.zeros((N_BATCH, MAX_LENGTH))
 # for b in range(N_BATCH):
@@ -187,17 +146,13 @@ Y_train = np.array(Y_train)
 
 X_test= np.array(X_test)
 Y_test = np.array(Y_test)
-# print len(Y_train)
-# print len(Y_train[0])
-# print len(X_train)
-# print len(X_train[0])
-# print len(Y_train[0][0])
+print X_train.shape
+print Y_train.shape
 
 # First, we build the network, starting with an input layer
 # Recurrent layers expect input of shape
 # (batch size, max sequence length, number of features)
 l_in = lasagne.layers.InputLayer(shape=(None, MAX_LENGTH, NUM_FEATURES))
-
 # l_dropout = lasagne.layers.DropoutLayer(l_in,p=0.9)
 
 # The network also needs a way to provide a mask for each sequence.  We'll
@@ -211,24 +166,23 @@ l_in = lasagne.layers.InputLayer(shape=(None, MAX_LENGTH, NUM_FEATURES))
 # for the final time step, which is all we need for this task
 l_forward_1 = lasagne.layers.LSTMLayer(
     l_in, N_HIDDEN, grad_clipping=GRAD_CLIP,
-    nonlinearity=lasagne.nonlinearities.sigmoid, learn_init=True,)
-
+    nonlinearity=lasagne.nonlinearities.tanh, learn_init=True,)
 
 l_forward_2 = lasagne.layers.LSTMLayer(
-        lasagne.layers.dropout(l_forward_1, p=0.2), N_HIDDEN, grad_clipping=GRAD_CLIP,
-        nonlinearity=lasagne.nonlinearities.leaky_rectify,learn_init=True)
+        lasagne.layers.dropout(l_forward_1, p=0.9), N_HIDDEN, grad_clipping=GRAD_CLIP,
+        nonlinearity=lasagne.nonlinearities.sigmoid,learn_init=True)
 
 l_forward_3 = lasagne.layers.LSTMLayer(
-        lasagne.layers.dropout(l_forward_2, p=0.3), N_HIDDEN, grad_clipping=GRAD_CLIP,
+        lasagne.layers.dropout(l_forward_2, p=0.2), N_HIDDEN, grad_clipping=GRAD_CLIP,
         nonlinearity=lasagne.nonlinearities.leaky_rectify,learn_init=True)
 # l_backward_2 = lasagne.layers.LSTMLayer(
 #         lasagne.layers.dropout(l_forward_1, p=.2), N_HIDDEN, grad_clipping=GRAD_CLIP,
 #         nonlinearity=lasagne.nonlinearities.leaky_rectify,learn_init=True,backwards = True)
 
 # l_concat = lasagne.layers.ConcatLayer([l_forward_2, l_backward_2])
-l_forward_slice = lasagne.layers.SliceLayer(l_forward_3, -1, 1)
+l_forward_slice = lasagne.layers.SliceLayer(l_forward_3, indices=slice(0,FINAL_FEATURES))
 
-l_out = lasagne.layers.DenseLayer(l_forward_slice, num_units=NUM_FEATURES, W = lasagne.init.GlorotNormal(), 
+l_out = lasagne.layers.DenseLayer(l_forward_slice, num_units=FINAL_FEATURES, W = lasagne.init.GlorotNormal(), 
     nonlinearity=lasagne.nonlinearities.linear)
 
 target_values = T.matrix('target_output')
@@ -236,16 +190,16 @@ target_values = T.matrix('target_output')
 # lasagne.layers.get_output produces a variable for the output of the net
 
 network_output = lasagne.layers.get_output(l_out,deterministic = False)
-predictions = network_output#*255
+predictions = network_output*255
 
-# l1_reg = lasagne.regularization.regularize_layer_params(l_in,lasagne.regularization.l1)*1e-4
-# l2_reg = lasagne.regularization.regularize_layer_params(l_in,lasagne.regularization.l2)*1e-4
+l1_reg = lasagne.regularization.regularize_layer_params(l_in,lasagne.regularization.l1)*1e-2
 
-cost = lasagne.objectives.squared_error(predictions, target_values).mean() #+ l1_reg  #mse
-# cost = T.mean(1 - T.batched_dot(predictions,target_values)/(tnorm(predictions)*tnorm(target_values))) + l1_reg + l2_reg#cosine similarity
+l2_reg = lasagne.regularization.regularize_layer_params(l_forward_slice,lasagne.regularization.l2)*1e-4
+
+# cost = lasagne.objectives.squared_error(predictions, target_values).mean() + l1_reg - l2_reg  #mse
+cost = T.mean(1 - T.batched_dot(predictions,target_values)/(tnorm(predictions)*tnorm(target_values)))#cosine similarity
 # cost = T.mean(T.sum(abs(predictions - target_values))) + l2_reg + l1_reg#manhattan distance
-# cost = T.mean(tnorm(predictions - target_values)) #+ l2_reg + l1_reg#euclidean distance
-
+# cost = T.mean(tnorm(predictions - target_values))+ l1_reg #+ l2_reg + l1_reg#euclidean distance
 # print cost
 # Retrieve all parameters from the network
 all_params = lasagne.layers.get_all_params(l_out)
@@ -268,8 +222,9 @@ try:
             
             train(X_train, Y_train)
 
-        cost_val = compute_cost(np.array(X_train), np.array([Y_train[-1]]))
-        
+        cost_val = compute_cost(np.array(X_train), np.array(Y_train))
+        print("Epoch {} validation cost = {}".format(epoch, cost_val))
+
         # pred = pred_func(np.array([X_train[-1]]))
         # pred = np.array(255*pred,dtype = "uint8")
         # pred = pred.reshape(64,64)
@@ -282,42 +237,45 @@ try:
 
         start_size = 10
 
-        sequence = [new_features[i] for i in range(start_size)]
+        sequence = [np.array(X[i]) for i in range(start_size)]
         idx_sequence = [range(start_size)]
         frames_left = set()
+        next_frame = pred_func(np.array([sequence]))
+        cv2.imshow("pred",(255*(next_frame)).reshape(64,64).astype("uint8"))
+        cv2.waitKey(1000)
+        # for i in range(start_size, len(X)):
+        #     frames_left.add(i)
 
-        for i in range(start_size, len(X)):
-            frames_left.add(i)
+        # while len(frames_left) > 0:
+        #     print np.array([sequence]).shape
+        #     next_frame = pred_func(np.array([sequence]))
 
-        while len(frames_left) > 0:
-            next_frame = pred_func(np.array([sequence]))
+        #     next_frame = np.array(255*next_frame,dtype = "uint8")
+        #     # cv2.imshow("pred",(next_frame).reshape(64,64).astype("uint8"))
+        #     # cv2.waitKey(1000)
+        #     dist = [(euclidean_distances(next_frame,Y[j]),j) for j in range(start_size,len(Y))]
 
-            next_frame = np.array(next_frame,dtype = "uint8")
-            # cv2.imshow("pred",(next_frame).reshape(64,64).astype("uint8"))
-            # cv2.waitKey(1000)
-            dist = [(euclidean_distances(next_frame,new_label_features[j]),j) for j in range(start_size,len(new_label_features))]
+        #     # similarities = [(cosine_similarity(next_frame,new_label_features[j]),j) for j in range(start_size,len(new_label_features))]
+        #     similarities = sorted(dist)
+        #     # similarities= similarities[::-1]
 
-            # similarities = [(cosine_similarity(next_frame,new_label_features[j]),j) for j in range(start_size,len(new_label_features))]
-            similarities = sorted(dist)
-            # similarities= similarities[::-1]
+        #     for s in similarities:
+        #         if s[1] in frames_left:
+        #             next_frame = X[s[1]+1]
 
-            for s in similarities:
-                if s[1] in frames_left:
-                    next_frame = new_label_features[s[1]]
-                    frames_left.remove(s[1])
-                    idx_sequence[0].append(s[1])
-                    break 
+        #             frames_left.remove(s[1])
+        #             idx_sequence[0].append(s[1])
+        #             break 
 
-            sequence.append(next_frame)
+        #     sequence.append(next_frame)
 
-        print idx_sequence
+        # print idx_sequence
 
-        for i in range(len(idx_sequence[0])-1):
-            if(idx_sequence[0][i] + 1  == idx_sequence[0][i+1]):
-                count+=1
-        print count/(1.0*(len(idx_sequence[0])-1))
+        # for i in range(len(idx_sequence[0])-1):
+        #     if(idx_sequence[0][i] + 1  == idx_sequence[0][i+1]):
+        #         count+=1
+        # print count/(1.0*(len(idx_sequence[0])-1))
         
-        print("Epoch {} validation cost = {}".format(epoch, cost_val))
         if cost_val < 1e-4:
             break;
 
@@ -395,18 +353,4 @@ size = 11
 
 # print count/(20-1)
 
-# chars = re.sub(r'\s+', ' ', open('corpus.txt').read().lower())
-# txt = theanets.recurrent.Text(chars, min_count=10)
-# A = 1 + len(txt.alpha)  # of letter classes
-
-# # # create a model to train: input -> gru -> relu -> softmax.
-# net = theanets.recurrent.Classifier([A  A])
-
-# # train the model iteratively; draw a sample after every epoch.
-# seed = txt.encode(txt.text[300017:300050])
-# print txt.classifier_batches(100, 32)
-# for tm, _ in net.itertrain(txt.classifier_batches(100, 32), momentum=0.9):
-#     print('{}|{} ({:.1f}%)'.format(
-#         txt.decode(seed),
-#         txt.decode(net.predict_sequence(seed, 40)),
-#         100 * tm['acc']))
+#
