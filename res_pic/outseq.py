@@ -75,7 +75,7 @@ if __name__ == "__main__":
     frame_seqs = [
         [0,1,2,3,4,5,6,7,8,9,10,11,12,15,17,14,16,13,18,19],
     ]
-    # lstm car run2
+    # lstm car run2, WARNING: USED 20-29 train, 30-39 test, should modify the ids
     # load data, (414, 720, 1280) -> (1, 414, 720, 1280)
     data = np.load("/home/public/10701/feature/car.npy")
     data = data.reshape((1,) + data.shape)
@@ -84,13 +84,13 @@ if __name__ == "__main__":
     frame_seqs = [
         [0,1,2,3,4,5,6,7,8,9,11,14,16,12,13,10,15,17,18,19],
     ]
-    # lstm car run3
+    # lstm car run3, WARNING: USED 20-29 train, 30-39 test, should modify the ids
     need_base_1_to_0 = False
     video_ids = [0]
     frame_seqs = [
         [0,1,2,3,4,5,6,7,8,9,14,13,12,16,11,10,15,17,18,19],
     ]
-    # lstm car run4
+    # lstm car run4, WARNING: USED 20-29 train, 30-39 test, should modify the ids
     need_base_1_to_0 = False
     video_ids = [0]
     frame_seqs = [
@@ -109,6 +109,7 @@ if __name__ == "__main__":
         correct_pic = np.zeros([pic_height, (pic_width + v_gap) * frame_size])
         frame_cnt = 0
         for cor_id in range(frame_size):
+            #cor_id = cor_id + 20
             # Append the correct pictures
             for lineno in range(pic_height):
                 s = frame_cnt * (pic_width + v_gap)
@@ -120,6 +121,7 @@ if __name__ == "__main__":
         pred_pic = np.zeros([pic_height, (pic_width + v_gap) * frame_size])
         frame_cnt = 0
         for pred_id in frame_seqs[video_cnt]:
+            #pred_id = pred_id + 20
             if need_base_1_to_0:
                 pred_id = pred_id - 1   # base 1 -> base 0
             # Append the predict pictures
