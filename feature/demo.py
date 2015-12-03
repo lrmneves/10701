@@ -6,6 +6,9 @@ from caffe.io import load_image
 
 import caffecnn
 
+__author__ = "Zheng Chen (zhengc1@cs.cmu.edu)"
+__version__ = "v1.0"
+
 """A demo of the cafecnn.TrainedCNN"""
 
 def classify_image(trainedcnn, image_path, show_image=False):
@@ -30,7 +33,7 @@ if __name__ == "__main__":
     # configuration
     caffe_root = "/home/public/caffe/"
     model_name = "bvlc_googlenet"
-    show_image = True
+    show_image = False
     
     # set the plot parameters
     if show_image:
@@ -41,7 +44,7 @@ if __name__ == "__main__":
     # load model
     trainedcnn = caffecnn.TrainedCNN(caffe_root=caffe_root,
         model_name=model_name,
-        cpu_mode=True,
+        cpu_mode=False,
         transformer=None,
         data_mean=None)
     

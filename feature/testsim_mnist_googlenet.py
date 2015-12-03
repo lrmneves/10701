@@ -1,6 +1,9 @@
 import numpy as np
 import scipy.spatial.distance as sdist
 
+__author__ = "Zheng Chen (zhengc1@cs.cmu.edu)"
+__version__ = "v1.0"
+
 """A test on MNIST using caffe googlenet feature and cosine similarity """
 
 if __name__ == "__main__":

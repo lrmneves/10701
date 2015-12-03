@@ -6,7 +6,10 @@ from caffe.io import load_image
 
 import caffecnn
 
-"""A demo of the cafecnn.TrainedCNN"""
+__author__ = "Zheng Chen (zhengc1@cs.cmu.edu)"
+__version__ = "v1.0"
+
+"""A demo of the cafecnn.TrainedCNN using alexnet """
 
 def classify_image(trainedcnn, image_path, show_image=False):
     """Use the trained CNN to calssify an image

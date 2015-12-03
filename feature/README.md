@@ -7,11 +7,11 @@ To run the demo,
 
 2. Go to `/path/to/your/caffe` and run `scripts/download_model_binary.py <path/to/model>` to download a pre-trained CNN, you could find a list of models in [ModelZOO](https://github.com/BVLC/caffe/wiki/Model-Zoo)
 
-3. Open `demo.py` and modify `caffe_root` on **line 31** and `model_name` on **line 32**
+3. Open `demo.py` and modify `caffe_root` on **line 34** and `model_name` on **line 35**
 
-4. The demo runs in CPU mode by default because the author had no money to buy a GPU. You could change `cpu_mode` on **line 44** to `False` to enable the GPU mode.
+4. The demo runs in <del>CPU</del> GPU mode by default because the author <del>had no money to buy a GPU</del> still had no money to buy a GPU but his TA had. You could change `cpu_mode` on **line 47** to `True` to disable the GPU mode.
 
-5. If you don't want images be plotted or you have trouble plotting images, disable `import matplotlib.pyplot as plt` on **line 2**, set `show_image` on **line 33** to `False`.
+5. If you want images be plotted, you could set `show_image` on **line 36** to `True`.
 
 6. Run `python demo.py`
 
