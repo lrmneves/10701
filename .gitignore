@@ -1,2 +1,10 @@
 .DS_Store
 *.py[cod]
+anaconda*/
+
+# data files, not using *.npy for flexity
+feature/car.npy
+feature/car_feature_414.npy
+feature/mnist_feature_100_20.npy
+feature/mnist_feature_50_20_alex.npy
+rnn/mnist_feature_100_20.npy
