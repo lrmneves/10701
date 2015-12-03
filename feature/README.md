@@ -47,7 +47,7 @@
     make all -j 4
     make test
     make runtest
-    make py
+    s
     ```
 
 7. run
