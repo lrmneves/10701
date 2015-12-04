@@ -1,15 +1,16 @@
 import numpy as np
 from random import randint
-X_full = np.load("/Users/lrmneves/workspace/Fall 2015/MachineLearning/finalProject/mnist_feature_100_20.npy")
+path = "/home/public/10701/feature/car_feature_414.npy"
+#path = "/home/public/10701/feature/mnist_feature_50_20_alex.npy"
+X_full = np.load(path)
+#X_t = X_full[0]
+X_t = X_full[20:40]
 
 
-X_t = X_full[0]
+MIN_LENGTH = 5
 
 
-MIN_LENGTH = 2
-
-
-TRAIN_SIZE = 20
+TRAIN_SIZE = 1000
 
 X = []
 Y = []
@@ -21,9 +22,9 @@ for i in range(TRAIN_SIZE):
 	end = randint(start + MIN_LENGTH,len(X_t)-2)
 	pos_or_neg = randint(0, 1)
 	if pos_or_neg == 0: #means its negative
-		prediction =randint(0,len(X_t))
-		while prediction != end + 1:
-			prediction =randint(0,len(X_t))
+		prediction =randint(0,len(X_t)-1)
+		while prediction == end + 1:
+			prediction =randint(0,len(X_t)-1)
 		current = np.vstack([X_t[start:end],X_t[prediction]])
 		X.append(current)
 		Y.append(0)
@@ -32,10 +33,7 @@ for i in range(TRAIN_SIZE):
 		X.append(current)
 		Y.append(1)
 
-MAX_LENGTH = -1 
-for i in range(len(X)):
-    if MAX_LENGTH < len(X[i]):
-        MAX_LENGTH = len(X[i])
+MAX_LENGTH = 20
 #Padding the sequence
 for i in range(len(X)):
 	z = np.zeros((MAX_LENGTH-len(X[i]),len(X[i][0])))
@@ -45,5 +43,5 @@ for i in range(len(X)):
 
 print np.mean(Y)
 
-np.save("X_class.npy",np.array(X))
-np.save("Y_class.npy",np.array(Y))
+np.save("X_car_class.npy",np.array(X))
+np.save("Y_car_class.npy",np.array(Y))
