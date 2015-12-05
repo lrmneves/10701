@@ -14,7 +14,7 @@ MAX_LENGTH = 20
 
 
 # Number of units in the hidden (recurrent) layer
-N_HIDDEN = 128
+N_HIDDEN = 1024
 # Number of training sequences in each batch
 N_BATCH = len(X)
 # Optimization learning rate
@@ -22,9 +22,9 @@ LEARNING_RATE = 1e-4
 # All gradients above this will be clipped
 GRAD_CLIP = 100
 # How often should we check the output?
-EPOCH_SIZE = 100
+EPOCH_SIZE = 10
 # Number of epochs to train the net
-NUM_EPOCHS = 100
+NUM_EPOCHS = 1000
 
 NUM_FEATURES = len(X[0][0])
 
@@ -55,14 +55,14 @@ l_mask = lasagne.layers.InputLayer(shape=(N_BATCH, MAX_LENGTH))
 # for the final time step, which is all we need for this task
 l_forward = lasagne.layers.LSTMLayer(
     l_in, N_HIDDEN, mask_input=l_mask, grad_clipping=GRAD_CLIP,
-    nonlinearity=lasagne.nonlinearities.sigmoid,learn_init = True, only_return_final=False)
+    nonlinearity=lasagne.nonlinearities.tanh,learn_init = True, only_return_final=False)
 
 l_backward = lasagne.layers.LSTMLayer(
     l_in, N_HIDDEN, mask_input=l_mask, grad_clipping=GRAD_CLIP,
     nonlinearity=lasagne.nonlinearities.tanh,
     only_return_final=False,learn_init = True, backwards=True)
 
-l_concat = lasagne.layers.ConcatLayer([l_forward, l_backward])
+l_concat = lasagne.layers.ConcatLayer([l_forward, lasagne.layers.dropout(l_backward, p=0.5)])
 
 l_forward_2 = lasagne.layers.LSTMLayer(
         lasagne.layers.dropout(l_concat, p=0.1), N_HIDDEN, grad_clipping=GRAD_CLIP,
