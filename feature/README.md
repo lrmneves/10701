@@ -39,8 +39,7 @@ To run the demo,
     2. set `BLAS := open`
     3. *Homebrew puts openblas in a directory that is not on the standard search path*, uncomment the `BLAS_INCLUDE` and `BLAS_LIB` after that line
     4. modify the `PYTHON_INCLUDE` a couple lines below according to your local settings
-    5. *Homebrew installs numpy in a non standard path*, uncomment `PYTHON_INCLUDE` after that line
-    6. modify `PYTHON_LIB` below to
+    5. *Homebrew installs numpy in a non standard path*, if you used Homebrew to install your numpy, uncomment `PYTHON_INCLUDE` after that line, and modify `PYTHON_LIB` below to
 
         ```
         PYTHON_LIB += $(dir $(dir $(shell python -c 'import numpy.core; print(numpy.core.__file__)')))/lib
@@ -62,9 +61,9 @@ To run the demo,
 
     ```
     make all -j 4
-    make test
-    make runtest
-    s
+    make test -j 4
+    make runtest -j 4
+    make pycaffe -j 4
     ```
 
 7. run
