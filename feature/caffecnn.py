@@ -47,7 +47,7 @@ class TrainedCNN(object):
         self.net = caffe.Net(model_deploy_path, model_path, caffe.TEST)
 
         # data transformer for pre-processing
-        if transformer == None:
+        if transformer is None:
             transformer = caffe.io.Transformer({
                 "data": self.net.blobs["data"].data.shape
             })
@@ -56,7 +56,7 @@ class TrainedCNN(object):
             transformer.set_channel_swap("data", (2, 1, 0))
             # the trained model operates on images in [0,255] instead of [0,1]
             transformer.set_raw_scale("data", 255)
-            if data_mean == None:
+            if data_mean is None:
                 mean_path = os.path.join(caffe_root, "python/caffe/imagenet/" \
                     "ilsvrc_2012_mean.npy")
                 if not os.path.isfile(mean_path):
@@ -100,7 +100,7 @@ class TrainedCNN(object):
         :param label_ids: A list of label ids
         :returns: A list of labels
         """
-        if self.labels == None:
+        if self.labels is None:
             print "No labels found! Use load_labels() to load the labels first."
             return []
         return self.labels[label_ids]
@@ -110,7 +110,7 @@ class TrainedCNN(object):
 
         :param label_path: The path of the label file, default ilsvrc12
         """
-        if label_path == None:
+        if label_path is None:
             label_path = os.path.join(self.caffe_root, "data/" \
                 "ilsvrc12/synset_words.txt")
         try:
