@@ -1,16 +1,16 @@
 import numpy as np
 from random import randint
-path = "/home/public/10701/feature/car_feature_414.npy"
-#path = "/home/public/10701/feature/mnist_feature_50_20_alex.npy"
+#path = "/home/public/10701/feature/car_feature_414.npy"
+path = "/home/public/10701/feature/mnist_feature_50_20_alex.npy"
 X_full = np.load(path)
-#X_t = X_full[0]
-X_t = X_full[20:40]
+X_t = X_full[1]
+#X_t = X_full[20:40]
 
 
-MIN_LENGTH = 5
+MIN_LENGTH = 10
 
 
-TRAIN_SIZE = 1000
+TRAIN_SIZE = 100
 
 X = []
 Y = []
@@ -43,5 +43,5 @@ for i in range(len(X)):
 
 print np.mean(Y)
 
-np.save("X_car_class.npy",np.array(X))
-np.save("Y_car_class.npy",np.array(Y))
+np.save("X_class.npy",np.array(X))
+np.save("Y_class.npy",np.array(Y))

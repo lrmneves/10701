@@ -7,14 +7,14 @@ import theano
 import theano.tensor as T
 import lasagne
 import cPickle as pickle
+X,Y = np.load("X_class.npy"),np.load("Y_class.npy")
 #X,Y = np.load("X_car_class.npy"),np.load("Y_car_class.npy")
-X,Y = np.load("X_car_class.npy"),np.load("Y_car_class.npy")
 
 MAX_LENGTH = 20 
 
 
 # Number of units in the hidden (recurrent) layer
-N_HIDDEN = 1024
+N_HIDDEN =2048
 # Number of training sequences in each batch
 N_BATCH = len(X)
 # Optimization learning rate
@@ -60,13 +60,13 @@ l_forward = lasagne.layers.LSTMLayer(
 l_backward = lasagne.layers.LSTMLayer(
     l_in, N_HIDDEN, mask_input=l_mask, grad_clipping=GRAD_CLIP,
     nonlinearity=lasagne.nonlinearities.tanh,
-    only_return_final=False,learn_init = True, backwards=True)
+    only_return_final=False,learn_init = True)
 
 l_concat = lasagne.layers.ConcatLayer([l_forward, lasagne.layers.dropout(l_backward, p=0.5)])
 
 l_forward_2 = lasagne.layers.LSTMLayer(
-        lasagne.layers.dropout(l_concat, p=0.1), N_HIDDEN, grad_clipping=GRAD_CLIP,
-        nonlinearity=lasagne.nonlinearities.sigmoid,learn_init=True)
+        lasagne.layers.dropout(l_concat, p=0.5), N_HIDDEN, grad_clipping=GRAD_CLIP,
+        nonlinearity=lasagne.nonlinearities.softplus,learn_init=True)
 
 # l_forward_3 = lasagne.layers.LSTMLayer(
 #         lasagne.layers.dropout(l_forward_2, p=0.2), N_HIDDEN, grad_clipping=GRAD_CLIP,
@@ -130,34 +130,36 @@ try:
 
 except KeyboardInterrupt:
     pass
-path = "/home/public/10701/feature/car_feature_414.npy"
-#path = "/home/public/10701/feature/mnist_feature_50_20_alex.npy"
+#path = "/home/public/10701/feature/car_feature_414.npy"
+path = "/home/public/10701/feature/mnist_feature_50_20_alex.npy"
 X_full = np.load(path)
-X_full = X_full[20:40]
+#X_full = X_full[20:40]
 start_size = 10
-X_t = X_full
-#X_t = X_full[0]
+#X_t = X_full
+X_t = X_full[1]
 sequence = X_t[:start_size]
 idx_sequence = []
 frames_left = set()
 for i in range(start_size, len(X_t)):
 	frames_left.add(i)
-training_size = 1000
+training_size = 100
+
 while len(frames_left) > 0:
 	probability = []
+        z_l = np.zeros((training_size-1,MAX_LENGTH,len(X_t[0])))
 	for f in frames_left:
 		current = np.vstack([sequence,X_t[f]])
 		mask_p = np.zeros((training_size,MAX_LENGTH))
 		mask_p[0,:len(current)] = 1
 		z = np.zeros((MAX_LENGTH-len(current),len(X_t[0])))
 		current = np.vstack([np.array(current),z])
-		z = np.zeros((training_size-1,MAX_LENGTH,len(X_t[0])))
-		current = np.vstack([[current],z])
-
+		current = np.vstack([[current],z_l])
 		next_frame = get_pred(current,mask_p)[0]
 		probability.append((next_frame,f))
-	probability= sorted(probability)[::-1]
-	idx_sequence.append(probability[0][1])
+	
+        probability= sorted(probability)
+	print probability
+        idx_sequence.append(probability[0][1])
 	frames_left.remove(probability[0][1])
 
 
@@ -165,12 +167,3 @@ while len(frames_left) > 0:
 print idx_sequence
 
 pickle.dump( lasagne.layers.get_all_param_values(l_out), open( "params.p", "wb" ) )
-'''
-X_full = np.load("/home/public/10701/feature/mnist_feature_50_20_alex.npy")
-start_size = 10
-X_t = X_full[0]
-sequence = X_t[:start_size]
-idx_sequence = [range(start_size)]
-frames_left = set()
-next_frame = pred_func(np.array([sequence]),np.array([ones(len(sequence)]))
-'''
